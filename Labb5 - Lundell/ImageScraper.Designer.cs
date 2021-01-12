@@ -60,6 +60,7 @@ namespace Labb5___Lundell
             // 
             // Linkbox
             // 
+            this.Linkbox.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.Linkbox.Location = new System.Drawing.Point(23, 50);
             this.Linkbox.Name = "Linkbox";
             this.Linkbox.Size = new System.Drawing.Size(646, 22);

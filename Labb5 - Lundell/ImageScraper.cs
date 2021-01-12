@@ -14,11 +14,13 @@ namespace Labb5___Lundell
         WebClient client = new WebClient();
         HttpClient httpclient = new HttpClient();
         List<Task> taskList = new List<Task>();
+        List<string> linkList = new List<string>();
         long img = 0;
         public ImageScraper()
         {
             InitializeComponent();
             Linkbox.Select();
+            Refresh();
         }
 
         private void ExtractBtn_Click(object sender, EventArgs e)
@@ -34,6 +36,7 @@ namespace Labb5___Lundell
             }
             using (client)
             {
+
                 string htmlCode = client.DownloadString(UserLink);
                 Regex rgx = new Regex(pattern);
                 Regex rgx2 = new Regex(pattern2);
@@ -43,7 +46,6 @@ namespace Labb5___Lundell
                     string match1 = match.ToString();
                     foreach (Match match2 in rgx2.Matches(match1))
                     {
-
                         string link1 = ($"{match2.Value}");
 
                         if (!link1.Contains(httpCheck))
@@ -51,8 +53,7 @@ namespace Labb5___Lundell
                             link1 = UserLink + link1;
                         }
                         ImagesBox.AppendText($"{link1}{Environment.NewLine}{Environment.NewLine}");
-                        Task < byte[]> task = httpclient.GetByteArrayAsync(link1);
-                        taskList.Add(task);
+                        linkList.Add(link1);
                     }
                     img++;
                 }
@@ -68,6 +69,7 @@ namespace Labb5___Lundell
                 else
                 {
                     ImgCount.Text = $"{img} images found in your quest for image domination";
+
                 }
             }
         }
@@ -75,46 +77,78 @@ namespace Labb5___Lundell
         private async void SaveBtn_Click(object sender, EventArgs e)
         {
             long downCount = 0;
+            string path = "";
             using (var fbd = new FolderBrowserDialog())
             {
                 DialogResult result = fbd.ShowDialog();
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    path = fbd.SelectedPath;
+                }
+            }
 
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath)) ;
+
+
+
+
+            if (!string.IsNullOrWhiteSpace(path))
+            {
+                foreach (var link in linkList)
+                {
+                    Task<byte[]> task = httpclient.GetByteArrayAsync(link);
+                    taskList.Add(task);
+                }
 
                 while (taskList.Count > 0)
                 {
                     Task<byte[]> finishedTask = (Task<byte[]>)await Task.WhenAny(taskList);
                     byte[] imgByteArr = finishedTask.Result;
 
-                    if (imgByteArr.Length > 0 && Png(imgByteArr) == true)
+                    taskList.Remove(finishedTask);
+
+                    try
                     {
-                        FileStream f1;
-                        f1 = new FileStream($"{fbd.SelectedPath}image{downCount}.png", FileMode.Create, FileAccess.Write);
-                        f1.WriteAsync(imgByteArr, 0, imgByteArr.Length);
+                        if (imgByteArr.Length > 0 && Png(imgByteArr) == true)
+                        {
+                            FileStream f1;
+                            f1 = new FileStream($@"{path}\image{downCount}.png", FileMode.Create, FileAccess.Write);
+                            await f1.WriteAsync(imgByteArr, 0, imgByteArr.Length);
+                            f1.Close();
+                            downCount++;
+                            downloadcount.Text = $"{downCount}out of {img} succesfully downloaded";
+                        }
+                        else if (imgByteArr.Length > 0)
+                        {
+                            FileStream f1;
+                            f1 = new FileStream($@"{path}\image{downCount}.jpg", FileMode.Create, FileAccess.Write);
+                            await f1.WriteAsync(imgByteArr, 0, imgByteArr.Length);
+                            f1.Close();
+                            downCount++;
+                            downloadcount.Text = $"{downCount} out of {img} images succesfully downloaded";
+                        }
                     }
-                    else if (imgByteArr.Length > 0)
+                    catch (Exception)
                     {
-                        FileStream f1;
-                        f1 = new FileStream($"{fbd.SelectedPath}image{downCount}.jpg", FileMode.Create, FileAccess.Write);
-                        f1.WriteAsync(imgByteArr, 0, imgByteArr.Length);
+                        throw;
                     }
-                    downCount++;
+
                 }
             }
 
-            /*
-              Använd WriteAsync() på FileStream objektet för att asynkront skriva data till fil.
-              Om någon av dina metoder använder await, se till att använda await i anropande
-              metoder hela vägen tillbaks till(inklusive) metoden som triggades av ett event.
-              Event handlers metoder är vanligtvis av typ void. 
-              Detta är egentligen det enda fall
-              där det är okej att använda async void. (annars använder ni async Task eller async
-              Task<T>).
-
-              När en Task avslutats kan ni kolla om den kastat någon exception med
-              task.Exception(t.ex.om en bild inte kunde laddas ner för att en länk var felaktig).*/
-
         }
+
+
+        /*
+          Använd WriteAsync() på FileStream objektet för att asynkront skriva data till fil.
+          Om någon av dina metoder använder await, se till att använda await i anropande
+          metoder hela vägen tillbaks till(inklusive) metoden som triggades av ett event.
+          Event handlers metoder är vanligtvis av typ void. 
+          Detta är egentligen det enda fall
+          där det är okej att använda async void. (annars använder ni async Task eller async
+          Task<T>).
+
+          När en Task avslutats kan ni kolla om den kastat någon exception med
+          task.Exception(t.ex.om en bild inte kunde laddas ner för att en länk var felaktig).*/
         static bool Png(Byte[] imgByteArr)
         {
             string pngId = "";
@@ -134,4 +168,6 @@ namespace Labb5___Lundell
             }
         }
     }
+
 }
+

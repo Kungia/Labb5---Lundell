@@ -36,6 +36,7 @@ namespace Labb5___Lundell
             this.LinkLabel = new System.Windows.Forms.Label();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.ImgCount = new System.Windows.Forms.Label();
+            this.downloadcount = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ExtractBtn
@@ -93,6 +94,14 @@ namespace Labb5___Lundell
             this.ImgCount.Size = new System.Drawing.Size(0, 17);
             this.ImgCount.TabIndex = 5;
             // 
+            // downloadcount
+            // 
+            this.downloadcount.AutoSize = true;
+            this.downloadcount.Location = new System.Drawing.Point(20, 424);
+            this.downloadcount.Name = "downloadcount";
+            this.downloadcount.Size = new System.Drawing.Size(0, 17);
+            this.downloadcount.TabIndex = 6;
+            // 
             // ImageScraper
             // 
             this.AcceptButton = this.ExtractBtn;
@@ -101,6 +110,7 @@ namespace Labb5___Lundell
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(695, 450);
+            this.Controls.Add(this.downloadcount);
             this.Controls.Add(this.ImgCount);
             this.Controls.Add(this.LinkLabel);
             this.Controls.Add(this.ImagesBox);
@@ -126,6 +136,7 @@ namespace Labb5___Lundell
         private System.Windows.Forms.Label LinkLabel;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
         private System.Windows.Forms.Label ImgCount;
+        private System.Windows.Forms.Label downloadcount;
     }
 }
 

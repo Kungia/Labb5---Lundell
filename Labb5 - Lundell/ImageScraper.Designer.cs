@@ -82,9 +82,9 @@ namespace Labb5___Lundell
             this.LinkLabel.AutoSize = true;
             this.LinkLabel.Location = new System.Drawing.Point(23, 27);
             this.LinkLabel.Name = "LinkLabel";
-            this.LinkLabel.Size = new System.Drawing.Size(341, 17);
+            this.LinkLabel.Size = new System.Drawing.Size(353, 17);
             this.LinkLabel.TabIndex = 4;
-            this.LinkLabel.Text = "Insert link to the page you want to scrape for images:";
+            this.LinkLabel.Text = "Insert a link to the page you want to scrape for images:";
             // 
             // ImgCount
             // 
@@ -121,7 +121,7 @@ namespace Labb5___Lundell
             this.MaximizeBox = false;
             this.Name = "ImageScraper";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
-            this.Text = "Form1";
+            this.Text = "Image Scraper In Search Of Image Domination";
             this.ResumeLayout(false);
             this.PerformLayout();
 

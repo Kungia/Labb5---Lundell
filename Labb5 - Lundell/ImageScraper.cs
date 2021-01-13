@@ -19,58 +19,73 @@ namespace Labb5___Lundell
         public ImageScraper()
         {
             InitializeComponent();
+            ImagesBox.Text = $"Welcome to this Image Scraper In Search Of Image Domination. {Environment.NewLine}{Environment.NewLine}" +
+                    $"This app only accepts links in the format of 'gp.se or 'https://www.gp.se/' {Environment.NewLine}" +
+                    $"This app can not guarantee performance on any other page than GP.SE.{Environment.NewLine}{Environment.NewLine}" +
+                    $"I hope you will enjoy using this this Image Scraper In Search Of Image Domination.";
             Linkbox.Select();
             Refresh();
         }
 
         private void ExtractBtn_Click(object sender, EventArgs e)
         {
-            string pattern = "<img.*src=\"(.*?)\"";
-            string pattern2 = @"(?<=src="")(.*?)(?="")";
-            string httpCheck = "https://";
-            var UserLink = Linkbox.Text;
-
-            if (!UserLink.Contains(httpCheck))
+            try
             {
-                UserLink = httpCheck + UserLink;
-            }
-            using (client)
-            {
+                string pattern = "<img.*src=\"(.*?)\"";
+                string pattern2 = @"(?<=src="")(.*?)(?="")";
+                string httpCheck = "https://";
+                var UserLink = Linkbox.Text;
 
-                string htmlCode = client.DownloadString(UserLink);
-                Regex rgx = new Regex(pattern);
-                Regex rgx2 = new Regex(pattern2);
-
-                foreach (Match match in rgx.Matches(htmlCode))
+                if (!UserLink.Contains(httpCheck))
                 {
-                    string match1 = match.ToString();
-                    foreach (Match match2 in rgx2.Matches(match1))
+                    UserLink = httpCheck + UserLink;
+                }
+                using (client)
+                {
+
+                    string htmlCode = client.DownloadString(UserLink);
+                    Regex rgx = new Regex(pattern);
+                    Regex rgx2 = new Regex(pattern2);
+
+                    foreach (Match match in rgx.Matches(htmlCode))
                     {
-                        string link1 = ($"{match2.Value}");
-
-                        if (!link1.Contains(httpCheck))
+                        string match1 = match.ToString();
+                        foreach (Match match2 in rgx2.Matches(match1))
                         {
-                            link1 = UserLink + link1;
+                            string link1 = ($"{match2.Value}");
+
+                            if (!link1.Contains(httpCheck))
+                            {
+                                link1 = UserLink + link1;
+                            }
+                            ImagesBox.AppendText($"{link1}{Environment.NewLine}{Environment.NewLine}");
+                            linkList.Add(link1);
                         }
-                        ImagesBox.AppendText($"{link1}{Environment.NewLine}{Environment.NewLine}");
-                        linkList.Add(link1);
+                        img++;
                     }
-                    img++;
-                }
 
-                if (img == 0)
-                {
-                    ImgCount.Text = $"We could not find any images in your quest for image domination";
+                    if (img == 0)
+                    {
+                        ImgCount.Text = $"We could not find any images in your quest for image domination";
+                    }
+                    if (img == 1)
+                    {
+                        ImgCount.Text = $"{img} image found in your quest for image domination";
+                    }
+                    else
+                    {
+                        ImgCount.Text = $"{img} images found in your quest for image domination";
+                    }
+                    SaveBtn.Select();
                 }
-                if (img == 1)
-                {
-                    ImgCount.Text = $"{img} image found in your quest for image domination";
-                }
-                else
-                {
-                    ImgCount.Text = $"{img} images found in your quest for image domination";
-
-                }
+            }
+            catch (Exception)
+            {
+                ImagesBox.Text = $"There was something wrong with your link.{Environment.NewLine}" +
+                    $"This app only accepts links in the format of 'gp.se or 'https://www.gp.se/'{Environment.NewLine}" +
+                    $"Please, try again";
+                Linkbox.Text = "";
+                Linkbox.Select();
             }
         }
 
@@ -87,10 +102,6 @@ namespace Labb5___Lundell
                 }
             }
 
-
-
-
-
             if (!string.IsNullOrWhiteSpace(path))
             {
                 foreach (var link in linkList)
@@ -104,6 +115,10 @@ namespace Labb5___Lundell
                     Task<byte[]> finishedTask = (Task<byte[]>)await Task.WhenAny(taskList);
                     byte[] imgByteArr = finishedTask.Result;
 
+                    if (finishedTask.Exception != null)
+                    {
+                        ImagesBox.Text = finishedTask.Exception.Message;
+                    }
                     taskList.Remove(finishedTask);
 
                     try
@@ -129,26 +144,15 @@ namespace Labb5___Lundell
                     }
                     catch (Exception)
                     {
+                        ImagesBox.Text = "";
+                        Linkbox.Select();
                         throw;
                     }
-
+                    ImagesBox.Text = "";
+                    Linkbox.Select();
                 }
             }
-
         }
-
-
-        /*
-          Använd WriteAsync() på FileStream objektet för att asynkront skriva data till fil.
-          Om någon av dina metoder använder await, se till att använda await i anropande
-          metoder hela vägen tillbaks till(inklusive) metoden som triggades av ett event.
-          Event handlers metoder är vanligtvis av typ void. 
-          Detta är egentligen det enda fall
-          där det är okej att använda async void. (annars använder ni async Task eller async
-          Task<T>).
-
-          När en Task avslutats kan ni kolla om den kastat någon exception med
-          task.Exception(t.ex.om en bild inte kunde laddas ner för att en länk var felaktig).*/
         static bool Png(Byte[] imgByteArr)
         {
             string pngId = "";
@@ -168,6 +172,5 @@ namespace Labb5___Lundell
             }
         }
     }
-
 }
 
